@@ -1,8 +1,21 @@
-# build stage
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+WORKDIR /app
 
- FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
- WORKDIR /source
- COPY . . 
- RUN dotnet restore ./net6-docker.csproj
- RUN dotnet publish ./net6-docker.csproj -c release -o /app --no-restore
- 
+# Copy csproj and restore as distinct layers
+COPY *.csproj ./
+RUN dotnet restore
+
+# Copy everything else and build
+COPY src/ ./
+RUN dotnet publish -c Release -o out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=build-env /app/out .
+
+EXPOSE 5000
+
+ENTRYPOINT ["dotnet", "net6-docker.dll"]
+
