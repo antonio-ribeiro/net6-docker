@@ -1,5 +1,0 @@
-# build container using existing build output
-# docker build ./docker/simple --rm -t weather:latest
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
-COPY bin/Debug/net6.0/ /App
-ENTRYPOINT ["dotnet", "net6-docker.dll"]
